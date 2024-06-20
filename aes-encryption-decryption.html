@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="devStack">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-76NZRQKMXF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'G-76NZRQKMXF');
+    </script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" charset="UTF-8"/>
+    <meta content='width=device-width, initial-scale=1, user-scalable=1, minimum-scale=1, maximum-scale=5'
+          name='viewport'/>
+    <title>AES Encryption and Decryption Online</title>
+    <meta name="robots" content="index follow"/>
+    <meta property="og:locale" content="en_US"/>
+    <meta property="og:type" content="website"/>
+    <meta name="twitter:card" content="summary"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        label {
+            margin-bottom: 0;
+            display: flex;
+            font-weight: 450;
+        }
+        @media only screen and (max-width: 600px) {
+            .yl-blog-details-section {
+                padding: 50px 0;
+            }
+        }
+    </style>
+</head>
+<body class="yl-home">
+
+
+
+<section id="yl-blog-details" class="yl-blog-details-section" ng-controller="aesController">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="yl-blog-details-content">
+                    <div class="yl-blog-details-wrap">
+                        <div class="yl-blog-details-text yl-headline">
+                            <article>
+                                <div class="row">
+                                    <div class="col-md-6 vertical-line">
+                                        <h2>AES Encryption</h2>
+                                        <label for="textToEncrypt">Enter Plain Text to Encrypt</label>
+                                        <textarea id="textToEncrypt" class="form-control input-lg" rows="4"
+                                                  placeholder="Enter plain text to be Encrypted"
+                                                  ng-model="textToEncrypt"
+                                                  name="textToEncrypt"></textarea>
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="mode">Select Cipher Mode of Encryption <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Block cipher modes operate on whole blocks and require that the final data fragment be padded to a
+                              full block if it is smaller than the current block size."></i></label>
+                                            <select class="form-select form-select-md mt-2" ng-model="mode" id="mode"
+                                                    ng-change="encryptModeSelected()">
+                                                <option value="ECB" selected>ECB</option>
+                                                <option value="CBC" >CBC</option>
+                                            </select>
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2" ng-show="showEncryptPadding">
+                                            <label for="encryptPadding">Select Padding <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Padding is used in a block cipher where we fill up the blocks with padding bytes. AES uses 128-bits (16 bytes)."></i></label>
+                                            <select class="form-select form-select-md mt-2" ng-model="encryptPadding"
+                                                    id="encryptPadding">>
+                                                <option value="NoPadding" selected>NoPadding</option>
+                                                <option value="PKCS5Padding" >PKCS5Padding</option>
+                                            </select>
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2" ng-show="showEncryptIV">
+                                            <label for="encryptivinput">Enter IV (Optional) <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="CBC mode requires IV to make each message unique. IV is used to randomize the encryption of similar blocks.
+                              Hence, any identical plain text blocks will be encrypted into dissimilar cipher text blocks with CBC."></i></label>
+                                            <input class="form-control input-lg" id="encryptivinput"
+                                                   ng-model="encryptiv"
+                                                   placeholder="Enter initialization vector" name="encryptivinput"/>
+                                        </div>
+                                
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="keysize">Key Size in Bits <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="A n bit key means - A brute-force attack will need a maximum complexity of 2^n to find the correct key."></i></label>
+                                            <select class="form-select form-select-md mt-2" ng-model="keysize"
+                                                    id="keysize">
+                                                <option value="128" selected>128</option>
+                                                <option value="192">192</option>
+                                                <option value="256">256</option>
+                                            </select>
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="secretkey">Enter Secret Key <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="If key size is 128 then 'aesEncryptionKey' is a valid secret key because it has 16 characters i.e 16 * 8 = 128 bits"></i></label>
+                                            <input class="form-control input-lg" id="secretkey" ng-model="secretkey"
+                                                   placeholder="Enter secret key" name="secretkey"/>
+                                        </div>
+                                        <div class="d-flex">
+                                            <label>Output Text Format</label>
+                                            <input type="radio" id="encryptHex" name="base64"
+                                                   ng-model="encryptOutputFormat" value="Hex"
+                                                   class="form-check-input m-1"
+                                                   aria-label="Output Text Format" checked>Hex</input>
+                                        </div>
+                                        <div class="display-inline">
+                                            <div class="yl-course-more-btn Encryp-btn yl-headline pera-content mt-3">
+                                                <button class="text-white" id="btn_encrypt" ng-click="aesEncrypt()">Encrypt</button>
+                                            </div>
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="outputString">AES Encrypted Output</label>
+                                            <textarea id="outputString" rows="4"
+                                                      placeholder="Result goes here" ng-model="encryptedOutput"
+                                                      name="outputString" style="width:100%"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h2>AES Decryption</h2>
+                                        <label for="textToDecrypt">AES Encrypted Text</label>
+                                        <textarea id="textToDecrypt" class="form-control input-lg" rows="4"
+                                                  ng-model="textToDecrypt" placeholder="Enter text to be Decrypted"
+                                                  name="textToDecrypt"></textarea>
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="dmode">Select Cipher Mode of Decryption <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Block cipher modes operate on whole blocks and require that the final data fragment be padded to a
+                              full block if it is smaller than the current block size."></i></label>
+                                            <select class="form-select form-select-md mt-2" ng-model="dmode" id="dmode"
+                                                    ng-change="decryptModeSelected()">
+                                                <option value="ECB" selected>ECB</option>
+                                                <option value="CBC" >CBC</option>
+                                            
+                                            </select>
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2" ng-show="showDecryptPadding">
+                                            <label for="decryptPadding">Select Padding <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Padding is used in a block cipher where we fill up the blocks with padding bytes. AES uses 128-bits (16 bytes)."></i></label>
+                                            <select class="form-select form-select-md mt-2" ng-model="decryptPadding"
+                                                    id="decryptPadding">
+                                                <option value="NoPadding" selected>NoPadding</option>
+                                                <option value="PKCS5Padding" >PKCS5Padding</option>
+                                            </select>
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2" ng-show="showDecryptIV">
+                                            <label for="decryptivinput">Enter IV Used During Encryption(Optional) <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="CBC mode requires IV to make each message unique. IV is used to randomize the encryption of similar blocks.
+                              Hence, any identical plain text blocks will be encrypted into dissimilar cipher text blocks with CBC."></i></label>
+                                            <input class="form-control input-lg" id="decryptivinput"
+                                                   ng-model="decryptiv"
+                                                   placeholder="Enter initialization vector" name="decryptiv"/>
+                                        </div>
+                                 
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="dkeysize">Key Size in Bits <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="A n bit key means - A brute-force attack will need a maximum complexity of 2^n to find the correct key."></i></label>
+                                            <select class="form-select form-select-md mt-2" ng-model="dkeysize"
+                                                    id="dkeysize">
+                                                <option value="128" selected>128</option>
+                                                <option value="192">192</option>
+                                                <option value="256">256</option>
+                                            </select>
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="dsecretkey">Enter Secret Key used for Encryption <i
+                                                    class="fa fa-question-circle mark-que"
+                                                    aria-hidden="true"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="If key size is 128 then 'aesEncryptionKey' is a valid secret key because it has 16 characters i.e 16 * 8 = 128 bits"></i></label>
+                                            <input class="form-control input-lg" id="dsecretkey" ng-model="dsecretkey"
+                                                   placeholder="Enter secret key" name="secretkey"/>
+                                        </div>
+                                        <div class="d-flex">
+                                            <label>Output Text Format</label>
+                                            <input type="radio" id="decryptPlaintext" checked name="decryptPlaintext"
+                                                   ng-model="decryptOutputFormat" value="plainText"
+                                                   class="form-check-input m-1" aria-label="Output Text Format" >Plain-Text</input>
+                                        </div>
+                                        <div class="display-inline">
+                                            <div class="yl-course-more-btn Encryp-btn yl-headline pera-content mt-3">
+                                                <button class="text-white" id="btn_decrypt" ng-click="decryptAes()">Decrypt</button>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="yl-contact-form-input input-100 pt-2">
+                                            <label for="doutputString">AES Decrypted Output</label>
+                                            <textarea id="doutputString" rows="4"
+                                                      placeholder="Decrypted result goes here"
+                                                      ng-model="decryptedString"
+                                                      name="doutputString" style="width:100%"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- JS library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.9/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+<script src="./assets/js/custom-min.js" async></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/ricmoo/aes-js/e27b99df/index.js"></script>
+<script>
+  
+  function encrypt(plainText, secret,keySize,iv,padding,mode,outPutMode) {
+        // Convert text to bytes
+    let textBytes = aesjs.utils.hex.toBytes(plainText);
+    let keyBytes = aesjs.utils.hex.toBytes(secret);
+    let ivBytes = aesjs.utils.hex.toBytes(iv);
+    let aesEcb = mode === 'CBC' ? new aesjs.ModeOfOperation.cbc(keyBytes,ivBytes) : new aesjs.ModeOfOperation.ecb(keyBytes);
+    let encryptedBytes = aesEcb.encrypt(textBytes);
+    let encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
+   return encryptedHex
+}
+
+// Decryption
+function decrypt(plainText, secret,keySize,iv,padding,mode) {
+    let textBytes = aesjs.utils.hex.toBytes(plainText);
+    let keyBytes = aesjs.utils.hex.toBytes(secret);
+    let ivBytes = aesjs.utils.hex.toBytes(iv);
+    let aesEcb = mode === 'CBC' ? new aesjs.ModeOfOperation.cbc(keyBytes,ivBytes) : new aesjs.ModeOfOperation.ecb(keyBytes);
+    let encryptedBytes = aesEcb.decrypt(textBytes);
+    let encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
+   return encryptedHex
+}
+
+  $("#btn_encrypt").click(function () {
+    const plainText = $('#textToEncrypt').val()
+    const mode = $('#mode').find(":selected").text();
+    const padding = $('#encryptPadding').find(":selected").text();
+    const keySize =  $('#keysize').find(":selected").text();
+    const secretKey = $('#secretkey').val()
+    const iv = $('#encryptivinput').val()
+    const outPutMode = $('#encryptBase64').prop("checked") ? true : false
+
+
+    if(plainText.length ===0 || secretKey.length ===0){
+        alert("Either plain text or secret key is missing.")
+        return 
+    }
+    if(secretKey.length  !== +keySize/8 ){
+        alert(`Length of secret key should be ${+keySize/8} for ${keySize} bits key size`)
+        return 
+    }
+    const ciphertext = encrypt(plainText,
+    secretKey,
+    keySize,
+      iv,
+      padding,
+      mode,
+      outPutMode
+    );
+    $("#outputString").val(ciphertext);
+  });
+  $("#btn_decrypt").click(function () {
+
+    const plainText = $('#textToDecrypt').val()
+    const mode = $('#dmode').find(":selected").text();
+    const padding = $('#decryptPadding').find(":selected").text();
+    const keySize =  $('#dkeysize').find(":selected").text();
+    const secretKey = $('#dsecretkey').val()
+    const iv = $('#decryptivinput').val()
+    const outPutMode = $('#encryptBase64').prop("checked") ? true : false
+
+    if(plainText.length ===0 || secretKey.length ===0){
+        alert("Either plain text or secret key is missing.")
+        return 
+    }
+    if(secretKey.length  !== +keySize/8 ){
+        alert(`Length of secret key should be ${+keySize/8} for ${keySize} bits key size`)
+        return 
+    }
+    const decryptText = decrypt(plainText,
+    secretKey,
+    keySize,
+      iv,
+      padding,
+      mode,
+    );
+    $("#doutputString").val(decryptText);
+  });
+
+</script>
+</body>
+</html>
